@@ -1,0 +1,20 @@
+[project]
+name = "odoo19-dev"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "odoo",
+    "pillow>=11.0.0",
+    "psycopg2-binary>=2.9.11",
+    "pywin32>=311",
+    "reportlab>=4.2.5",
+    "werkzeug<3.1.0",
+]
+
+[tool.uv.sources]
+odoo = { path = "odoo", editable = true }
+
+[tool.uv.workspace]
+members = ["addons_custom/odoo-whatsapp-ai"]
