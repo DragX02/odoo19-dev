@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_whatsapp_ai_contacts" model="ir.actions.act_window">
+        <field name="name">Contacts via WhatsApp</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_whatsapp_ai_root"
+              name="WhatsApp AI"
+              web_icon="base,static/description/icon.png"
+              action="action_whatsapp_ai_contacts"
+              sequence="10"/>
+</odoo>
