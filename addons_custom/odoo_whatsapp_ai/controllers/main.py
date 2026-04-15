@@ -12,11 +12,11 @@ class WhatsAppController(http.Controller):
             'api_url': ICP.get_param('odoo_whatsapp_ai.evolution_api_url'),
             'api_key': ICP.get_param('odoo_whatsapp_ai.evolution_api_key'),
             'instance': ICP.get_param('odoo_whatsapp_ai.evolution_instance'),
-            'ai_key': ICP.get_param('odoo_whatsapp_ai.ai_api_key'),
-            'ai_provider': ICP.get_param('odoo_whatsapp_ai.ai_provider', default='gemini'),
+            'ai_key': ICP.get_param('odoo_whatsapp_ai.key_ai_api'),
+            'ai_model': ICP.get_param('odoo_whatsapp_ai.ai_model', default='gemini-1.5-flash'),
         }
 
-    @http.route('/whatsapp/webhook', type='json', auth='public', methods=['POST'], csrf=False)
+    @http.route('/whatsapp/webhook', type='jsonrpc', auth='public', methods=['POST'], csrf=False)
     def webhook(self):
         data = request.get_json_data()
         configs = self._get_configs()
@@ -31,14 +31,16 @@ class WhatsAppController(http.Controller):
         if 'imageMessage' in message:
             image_path = self._save_evolution_media(msg_data, configs)
             if image_path:
-                info = analyze_card(image_path, configs['ai_key'], configs['ai_provider'])
+                info = analyze_card(image_path, configs['ai_key'], configs['ai_model'])
                 if info and "error" not in info:
                     self._send_evolution_confirmation(sender, info, configs)
         
         elif 'conversation' in message or 'extendedTextMessage' in message:
-            text = message.get('conversation') or message.get('extendedTextMessage', {}).get('text')
-            if text:
-                self._handle_user_choice(sender, text.strip(), configs)
+            text = (message.get('conversation') or message.get('extendedTextMessage', {}).get('text') or "").strip().lower()
+            if any(w in text for w in ['bonjour', 'hello', 'odoo']):
+                self._send_text(sender, "Bonjour ! Le Bot Odoo est bien connecté.", configs)
+            elif text in ['1', '2', '3', '4']:
+                self._handle_user_choice(sender, text, configs)
                 
         return {"status": "ok"}
 
@@ -56,22 +58,19 @@ class WhatsAppController(http.Controller):
         except:
             return False
 
-    def _send_evolution_confirmation(self, to, info, configs):
+    def _send_text(self, to, text, configs):
         url = f"{configs['api_url']}/message/sendText/{configs['instance']}"
-        text = (f"🔍 *Carte de visite détectée*\n\n"
-                f"👤 *Nom:* {info.get('name')}\n"
-                f"📧 *Email:* {info.get('email')}\n"
-                f"🏢 *Société:* {info.get('company')}\n\n"
-                f"Que voulez-vous faire ?\n"
-                f"1️⃣ Ajouter comme Contact\n"
-                f"2️⃣ Créer une Piste (CRM)")
-               
         payload = {"number": to, "text": text}
         headers = {"apikey": configs['api_key'], "Content-Type": "application/json"}
         requests.post(url, json=payload, headers=headers)
 
+    def _send_evolution_confirmation(self, to, info, configs):
+        text = (f"🔍 *Infos détectées*\n\n"
+                f"👤 *Nom:* {info.get('name')}\n"
+                f"📧 *Email:* {info.get('email')}\n"
+                f"🏢 *Société:* {info.get('company')}\n\n"
+                f"1️⃣ Client\n2️⃣ Fournisseur\n3️⃣ Contact\n4️⃣ Ignorer")
+        self._send_text(to, text, configs)
+
     def _handle_user_choice(self, sender, choice, configs):
-        if choice == '1':
-            pass
-        elif choice == '2':
-            pass
+        pass

@@ -7,28 +7,25 @@
         <field name="arch" type="xml">
             <xpath expr="//form" position="inside">
                 <app data-string="WhatsApp AI" string="WhatsApp AI" name="odoo_whatsapp_ai">
-                    
                     <block title="Evolution API Configuration" name="evolution_api_settings">
-                        <setting help="Configurez l'URL de votre serveur Evolution">
-                            <field name="evolution_api_url" placeholder="http://localhost:8080"/>
+                        <setting help="URL du serveur Evolution">
+                            <field name="evolution_api_url"/>
                         </setting>
-                        <setting help="Votre clé API secrète (apikey)">
+                        <setting help="Clé API secrète">
                             <field name="evolution_api_key" password="True"/>
                         </setting>
-                        <setting help="Nom de l'instance WhatsApp créée dans Evolution">
-                            <field name="evolution_instance_name" placeholder="odoo"/>
+                        <setting help="Nom de l'instance">
+                            <field name="evolution_instance"/>
                         </setting>
                     </block>
-
                     <block title="Intelligence Artificielle" name="ai_settings">
                         <setting help="Sélectionnez votre moteur d'IA">
-                            <field name="ai_provider"/>
+                            <field name="ai_model"/>
                         </setting>
-                        <setting string="Clé API IA" help="Clé pour Gemini ou OpenAI">
-                            <field name="ai_api_key" password="True"/>
+                        <setting string="Clé API IA" help="Clé API externe">
+                            <field name="key_ai_api" password="True"/>
                         </setting>
                     </block>
-                    
                 </app>
             </xpath>
         </field>

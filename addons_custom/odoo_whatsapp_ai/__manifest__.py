@@ -1,10 +1,12 @@
 {
     'name': 'WhatsApp AI CRM',
     'version': '1.0',
-    'depends': ['base', 'contacts'],
+    'author': 'Odoo Dev',
+    'depends': ['base', 'contacts', 'mail'],
     'data': [
         'security/ir.model.access.csv',
         'views/res_config_settings_views.xml', 
+        'views/res_partner_views.xml',
         'views/menus.xml',                    
     ],
     'installable': True,
