@@ -24,8 +24,14 @@
                         <setting help="Sélectionnez votre moteur d'IA">
                             <field name="ai_model"/>
                         </setting>
-                        <setting string="Clé API IA" help="Clé pour Gemini ou OpenAI">
+                        <setting string="Clé API Google Gemini" help="Obtenez votre clé gratuite sur https://ai.google.dev/" invisible="ai_model == 'ollama'">
                             <field name="key_ai_api" password="True"/>
+                        </setting>
+                        <setting string="URL API Ollama" help="URL de votre serveur Ollama local" invisible="ai_model != 'ollama'">
+                            <field name="ollama_api_url"/>
+                        </setting>
+                        <setting string="Modèle Ollama" help="Nom du modèle multimodal à utiliser (ex: llava)" invisible="ai_model != 'ollama'">
+                            <field name="ollama_model"/>
                         </setting>
                     </block>
                     

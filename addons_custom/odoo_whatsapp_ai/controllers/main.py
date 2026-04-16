@@ -33,9 +33,9 @@ class WhatsAppController(http.Controller):
             _logger.info("Webhook: Aucun partenaire trouvé pour le numéro %s (JID: %s). Vérifiez que le contact existe et que son numéro est correct.", phone_number, sender_jid)
         return partner
 
-    @http.route('/whatsapp/webhook', type='jsonrpc', auth='public', methods=['POST'], csrf=False)
-    def webhook(self):
-        data = request.get_json_data()
+    @http.route(['/whatsapp/webhook', '/whatsapp/webhook/<string:path>'], type='json', auth='public', methods=['POST'], csrf=False)
+    def webhook(self, path=None):
+        data = request.jsonrequest if isinstance(request.jsonrequest, dict) else {}
         cfg = self._get_configs()
 
         if data.get('event') != 'messages.upsert':
@@ -271,6 +271,51 @@ class WhatsAppController(http.Controller):
             _logger.error("Error sending WhatsApp message: %s", e)
             return {"status": "error", "message": str(e)}
 
+    @http.route('/whatsapp/import_history', type='json', auth='user', methods=['POST'], csrf=False)
+    def import_message_history(self):
+        """Importe l'historique des messages depuis Evolution API"""
+        try:
+            cfg = self._get_configs()
+            if not cfg['url'] or not cfg['key'] or not cfg['instance']:
+                return {"status": "error", "message": "WhatsApp API not configured"}
+
+            # Récupérer tous les messages de l'instance
+            url = f"{cfg['url']}/chat/messages/{cfg['instance']}"
+            response = requests.get(url, headers={"apikey": cfg['key']}, timeout=30)
+            response.raise_for_status()
+
+            messages_data = response.json().get('data', [])
+            Message = request.env['whatsapp.message'].sudo()
+            imported_count = 0
+
+            for msg_info in messages_data:
+                # Vérifier si le message existe déjà
+                existing = Message.search([
+                    ('sender_jid', '=', msg_info.get('sender_jid')),
+                    ('body', '=', msg_info.get('body')),
+                    ('create_date', '=', msg_info.get('timestamp'))
+                ], limit=1)
+
+                if not existing:
+                    sender_jid = msg_info.get('sender_jid', '')
+                    partner = self._find_partner(sender_jid)
+
+                    Message.create({
+                        'partner_id': partner.id if partner else None,
+                        'sender_jid': sender_jid,
+                        'body': msg_info.get('body', ''),
+                        'message_type': 'incoming' if not msg_info.get('fromMe') else 'outgoing',
+                    })
+                    imported_count += 1
+
+            return {
+                "status": "ok",
+                "message": f"{imported_count} messages importés avec succès"
+            }
+        except Exception as e:
+            _logger.error("Erreur lors de l'import de l'historique: %s", e)
+            return {"status": "error", "message": str(e)}
+
     def _process_choice(self, sender, choice, cfg, partner=None):
         PendingContact = request.env['whatsapp.pending.contact'].sudo()
         pending_contact = PendingContact.search([('sender_jid', '=', sender)], limit=1)
@@ -319,5 +364,5 @@ class WhatsAppController(http.Controller):
             partner_vals['supplier_rank'] = 1
 
         new_partner = Partner.create(partner_vals)
-        self._send_text(sender, f"✅ Contact '{new_partner.name}' créé avec succès dans Odoo.", cfg, partner=new_partner)
+        self._send_text(sender, f" Contact '{new_partner.name}' créé avec succès dans Odoo.", cfg, partner=new_partner)
         pending_contact.unlink()

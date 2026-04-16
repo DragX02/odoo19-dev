@@ -20131,6 +20131,18 @@ return iframeLoaded;}
 __exports.loadIframeBundles=loadIframeBundles;function loadIframeBundles(iframe,bundles,{css=true,js=false}={}){return loadIframe(iframe,async()=>Promise.all(bundles.map(async(bundle)=>await loadBundle(bundle,{targetDoc:iframe.contentDocument,css,js}))));}
 return __exports;});;
 
+/* /odoo_whatsapp_ai/static/src/js/whatsapp_chat.js */
+odoo.define('@odoo_whatsapp_ai/js/whatsapp_chat',['@web/core/registry','@web/core/utils/hooks','@web/core/network/rpc','@odoo/owl'],function(require){'use strict';let __exports={};const{registry}=require("@web/core/registry");const{useService}=require("@web/core/utils/hooks");const{rpc}=require("@web/core/network/rpc");const{Component,useState,onMounted,useRef,onPatched}=require("@odoo/owl");class WhatsAppChatWidget extends Component{setup(){this.orm=useService("orm");this.notification=useService("notification");this.messageContainer=useRef("messageContainer");this.state=useState({messages:[],inputText:"",sending:false,});onMounted(()=>this.loadMessages());onPatched(()=>this.scrollToBottom());}
+formatDate(dateStr){if(!dateStr)return'';try{const date=new Date(dateStr.replace(' ','T'));const hours=String(date.getHours()).padStart(2,'0');const minutes=String(date.getMinutes()).padStart(2,'0');return`${hours}:${minutes}`;}catch(e){return'';}}
+async loadMessages(){try{const partnerId=this.props.record.resId;if(!partnerId){console.warn("No partner ID available");this.state.messages=[];return;}
+const messages=await this.orm.searchRead("whatsapp.message",[["partner_id","=",partnerId]],["id","body","message_type","create_date","has_media","media_type","ai_analysis"],{order:"create_date ASC"});this.state.messages=(messages||[]).map(msg=>({...msg,has_media:msg.has_media||false,media_type:msg.media_type||null,ai_analysis:msg.ai_analysis||null,}));}catch(error){console.error("Error loading messages:",error);this.notification.add("Erreur lors du chargement des messages",{type:"danger"});this.state.messages=[];}}
+async sendMessage(){const text=this.state.inputText.trim();if(!text){this.notification.add("Veuillez entrer un message",{type:"warning"});return;}
+if(!this.props.record.resId){this.notification.add("Erreur: Contact non trouvé",{type:"danger"});return;}
+this.state.sending=true;try{const result=await rpc("/whatsapp/send",{partner_id:this.props.record.resId,message:text,});if(result&&result.status==="ok"){this.state.inputText="";this.notification.add("Message envoyé ✓",{type:"success"});setTimeout(()=>this.loadMessages(),500);}else{const errorMsg=result?.message||"Erreur lors de l'envoi";this.notification.add(errorMsg,{type:"danger"});}}catch(error){console.error("Error sending message:",error);const errorMsg=error?.message||"Erreur de communication avec le serveur";this.notification.add(errorMsg,{type:"danger"});}finally{this.state.sending=false;}}
+onInputKeydown(event){if((event.ctrlKey||event.metaKey)&&event.key==="Enter"){event.preventDefault();this.sendMessage();}}
+scrollToBottom(){const container=this.messageContainer.el;if(container){setTimeout(()=>{container.scrollTop=container.scrollHeight;},0);}}}
+WhatsAppChatWidget.template="whatsapp_chat.ChatWidget";WhatsAppChatWidget.props={record:Object,readonly:{type:Boolean,optional:true}};registry.category("fields").add("whatsapp_chat",{component:WhatsAppChatWidget,supportedTypes:["one2many"],});__exports[Symbol.for("default")]=WhatsAppChatWidget;return __exports;});;
+
 /* /api_doc/static/src/api_action.js */
 odoo.define('@api_doc/api_action',['@web/core/l10n/translation','@web/core/registry'],function(require){'use strict';let __exports={};const{_t}=require("@web/core/l10n/translation");const{registry}=require("@web/core/registry");registry.category("actions").add("doc_api_key_wizard",()=>{return{type:"ir.actions.act_window",name:_t("API Key Wizard"),res_model:"res.users.apikeys.description",views:[[false,"form"]],target:"new",}});return __exports;});;
 
@@ -33830,6 +33842,63 @@ registerTemplate("mail.EmailHtmlConverterHead", `/mail/static/src/convert_inline
         <meta http-equiv="Content-Security-Policy" content="script-src 'none';"/>
         <meta charset="utf-8"/>
         <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
+    </t>
+`);
+registerTemplate("whatsapp_chat.ChatWidget", `/odoo_whatsapp_ai/static/src/xml/whatsapp_chat.xml`, `<t t-name="whatsapp_chat.ChatWidget" xml:space="preserve">
+        <div class="o_whatsapp_chat_container">
+
+            <div class="o_chat_messages" t-ref="messageContainer">
+                <t t-if="state.messages.length === 0">
+                    <div class="o_chat_empty">
+                        <p>Aucun message pour le moment...</p>
+                    </div>
+                </t>
+                <t t-foreach="state.messages" t-as="msg" t-key="msg.id">
+                    <t t-if="msg">
+                        <div t-attf-class="o_whatsapp_message {{ msg.message_type === 'incoming' ? 'o_message_incoming' : 'o_message_outgoing' }}">
+                            <div class="o_message_bubble">
+                                <t t-if="msg.has_media">
+                                    <div class="o_message_media">
+                                        <span t-attf-class="badge badge-pill {{ msg.media_type === 'image' ? 'bg-warning' : 'bg-danger' }}">
+                                            <t t-if="msg.media_type === 'image'">📷 Image</t>
+                                            <t t-elif="msg.media_type === 'pdf'">📄 PDF</t>
+                                            <t t-else="">📎 Fichier</t>
+                                        </span>
+                                    </div>
+                                </t>
+                                <p class="o_message_text"><t t-esc="msg.body or 'Message vide'"/></p>
+                                <t t-if="msg.ai_analysis">
+                                    <div class="o_message_analysis alert alert-info alert-link mb-0" role="status">
+                                        <small><strong>🤖 IA:</strong> <t t-esc="msg.ai_analysis"/></small>
+                                    </div>
+                                </t>
+                                <div class="o_message_footer">
+                                    <span class="o_message_time">
+                                        <small>
+                                            <t t-if="msg.message_type === 'incoming'">↙</t>
+                                            <t t-else="">✓</t>
+                                            <t t-if="msg.create_date">
+                                                <t t-esc="formatDate(msg.create_date)"/>
+                                            </t>
+                                        </small>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </t>
+            </div>
+
+            <div class="o_chat_input_bar">
+                <textarea class="o_chat_input" t-model="state.inputText" placeholder="Écrire un message..." rows="1" t-on-keydown="onInputKeydown" t-att-disabled="state.sending"/>
+                <button class="btn btn-success o_chat_send_btn" t-on-click="sendMessage" t-att-disabled="state.sending">
+                    <t t-if="state.sending">
+                        <span class="spinner-border spinner-border-sm me-2"/>Envoi...
+                    </t>
+                    <t t-else="">Envoyer ➤</t>
+                </button>
+            </div>
+        </div>
     </t>
 `);
 registerTemplate("ImportAction", `/base_import/static/src/import_action/import_action.xml`, `<t t-name="ImportAction" xml:space="preserve">

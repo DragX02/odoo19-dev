@@ -13,6 +13,11 @@
             <xpath expr="//field[@name='phone']" position="after">
                 <field name="is_ai_generated" readonly="1"/>
             </xpath>
+            <xpath expr="//notebook" position="inside">
+                <page string="Chat WhatsApp">
+                    <field name="whatsapp_message_ids" widget="whatsapp_chat" nolabel="1"/>
+                </page>
+            </xpath>
         </field>
     </record>
 </odoo>
