@@ -33,9 +33,9 @@ class WhatsAppController(http.Controller):
             _logger.info("Webhook: Aucun partenaire trouvé pour le numéro %s (JID: %s). Vérifiez que le contact existe et que son numéro est correct.", phone_number, sender_jid)
         return partner
 
-    @http.route(['/whatsapp/webhook', '/whatsapp/webhook/<string:path>'], type='json', auth='public', methods=['POST'], csrf=False)
-    def webhook(self, path=None):
-        data = request.jsonrequest if isinstance(request.jsonrequest, dict) else {}
+    @http.route('/whatsapp/webhook', type='jsonrpc', auth='public', methods=['POST'], csrf=False)
+    def webhook(self):
+        data = request.jsonrequest or {}
         cfg = self._get_configs()
 
         if data.get('event') != 'messages.upsert':
