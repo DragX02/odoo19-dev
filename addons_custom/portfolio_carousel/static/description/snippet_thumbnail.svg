@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 140" width="200" height="140">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1a1a2e"/>
+      <stop offset="100%" stop-color="#16213e"/>
+    </linearGradient>
+  </defs>
+  <rect width="200" height="140" fill="url(#bg)"/>
+  <!-- 5 cards en perspective -->
+  <g transform="translate(100 70)">
+    <rect x="-18" y="-22" width="36" height="44" rx="3" fill="#3a3a5c" opacity="0.4" transform="translate(-58 0) skewY(-5)"/>
+    <rect x="-22" y="-28" width="44" height="56" rx="4" fill="#5b5b8a" opacity="0.6" transform="translate(-32 0) skewY(-3)"/>
+    <rect x="-26" y="-34" width="52" height="68" rx="5" fill="#ffb800"/>
+    <rect x="-22" y="-28" width="44" height="56" rx="4" fill="#5b5b8a" opacity="0.6" transform="translate(32 0) skewY(3)"/>
+    <rect x="-18" y="-22" width="36" height="44" rx="3" fill="#3a3a5c" opacity="0.4" transform="translate(58 0) skewY(5)"/>
+  </g>
+  <!-- petits boutons nav -->
+  <g transform="translate(100 122)">
+    <circle cx="-14" cy="0" r="5" fill="#ffb800"/>
+    <circle cx="0" cy="0" r="5" fill="#ffb800"/>
+    <circle cx="14" cy="0" r="5" fill="#ffb800"/>
+  </g>
+</svg>

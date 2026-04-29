@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <template id="s_portfolio_carousel"
+                  name="Portfolio Carousel 3D"
+                  key="portfolio_carousel.s_portfolio_carousel">
+            <section class="s_portfolio_carousel oe_snippet_body" data-name="Portfolio Carousel 3D">
+                <div class="container py-5">
+                    <div class="o_carousel3d"
+                         data-c3d-depth="300"
+                         data-c3d-autoplay="true"
+                         data-c3d-interval="3000">
+                        <img src="/web/image/website.s_banner_default_image" alt="1"/>
+                        <img src="/web/image/website.s_banner_default_image" alt="2"/>
+                        <img src="/web/image/website.s_banner_default_image" alt="3"/>
+                        <img src="/web/image/website.s_banner_default_image" alt="4"/>
+                        <img src="/web/image/website.s_banner_default_image" alt="5"/>
+                        <img src="/web/image/website.s_banner_default_image" alt="6"/>
+                    </div>
+                </div>
+            </section>
+        </template>
+    </data>
+</odoo>

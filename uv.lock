@@ -1050,6 +1050,7 @@ dependencies = [
     { name = "odoo" },
     { name = "pillow" },
     { name = "psycopg2-binary" },
+    { name = "pypdf2" },
     { name = "pywin32" },
     { name = "reportlab" },
     { name = "werkzeug" },
@@ -1061,6 +1062,7 @@ requires-dist = [
     { name = "odoo", editable = "odoo" },
     { name = "pillow", specifier = ">=11.0.0" },
     { name = "psycopg2-binary", specifier = ">=2.9.11" },
+    { name = "pypdf2", specifier = "<2.11" },
     { name = "pywin32", specifier = ">=311" },
     { name = "reportlab", specifier = ">=4.2.5" },
     { name = "werkzeug", specifier = "<3.1.0" },
@@ -1434,11 +1436,11 @@ wheels = [
 
 [[package]]
 name = "pypdf2"
-version = "3.0.1"
+version = "2.10.9"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/9f/bb/18dc3062d37db6c491392007dfd1a7f524bb95886eb956569ac38a23a784/PyPDF2-3.0.1.tar.gz", hash = "sha256:a74408f69ba6271f71b9352ef4ed03dc53a31aa404d29b5d31f53bfecfee1440", size = 227419 }
+sdist = { url = "https://files.pythonhosted.org/packages/58/10/797f1d2cd036782caf57b5863930b7266359f16a06e627324088b0f46b33/PyPDF2-2.10.9.tar.gz", hash = "sha256:f2da5254f054e8ef810c531fe11af6f0a436a2be15985ee0d28868d8698e5a3f", size = 205769 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/8e/5e/c86a5643653825d3c913719e788e41386bee415c2b87b4f955432f2de6b2/pypdf2-3.0.1-py3-none-any.whl", hash = "sha256:d16e4205cfee272fbdc0568b68d82be796540b1537508cef59388f839c191928", size = 232572 },
+    { url = "https://files.pythonhosted.org/packages/a4/ee/483e388db37bfabc70b7fe1c87fee5f3c0a08477cfe435f3df9f467fa0df/PyPDF2-2.10.9-py3-none-any.whl", hash = "sha256:cf0e2f284f10646e9f11e85e0b8c48c8908580ff0b7aa0b1e4f09e29bc762243", size = 218402 },
 ]
 
 [[package]]
